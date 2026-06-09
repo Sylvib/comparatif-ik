@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indemnité d'éloignement – Simulateur FO Métaux</title>
+<style>
+  :root{
+    --rouge:#c8102e;
+    --rouge-fonce:#9b0c23;
+    --encre:#1a1a1a;
+    --gris:#6b6b6b;
+    --ligne:#e3e3e3;
+    --papier:#ffffff;
+    --fond:#f4f3f1;
+    --ambre:#b8860b;
+    --ambre-fond:#fcf3df;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--fond);
+    color:var(--encre);
+    line-height:1.5;
+    -webkit-text-size-adjust:100%;
+    padding-bottom:48px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+  header{
+    background:var(--rouge);
+    color:#fff;
+    padding:22px 0 20px;
+    border-bottom:5px solid var(--rouge-fonce);
+  }
+  header .wrap{display:flex;align-items:center;gap:14px}
+  .logo{
+    background:#fff;color:var(--rouge);
+    font-weight:800;font-size:20px;letter-spacing:.5px;
+    padding:8px 12px;border-radius:6px;flex-shrink:0;
+  }
+  header h1{font-size:18px;font-weight:700;line-height:1.25}
+  header p{font-size:12.5px;opacity:.9;margin-top:2px}
+
+  .badge{
+    display:inline-block;background:var(--ambre-fond);color:var(--ambre);
+    border:1px solid var(--ambre);font-weight:700;font-size:12.5px;
+    padding:4px 10px;border-radius:20px;margin:22px 0 4px;
+  }
+  .intro{font-size:14px;color:var(--gris);margin:8px 0 22px}
+
+  .card{
+    background:var(--papier);border:1px solid var(--ligne);border-radius:14px;
+    padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:22px;
+  }
+  .card h2{font-size:15px;text-transform:uppercase;letter-spacing:.6px;color:var(--rouge);margin-bottom:16px}
+
+  .switch-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:var(--ambre-fond);border:1px solid var(--ambre);border-radius:12px;
+    padding:13px 15px;margin-bottom:20px;
+  }
+  .switch-row .txt{font-size:13.5px;font-weight:700;color:var(--ambre)}
+  .switch-row .txt small{display:block;font-weight:500;font-size:11.5px;color:var(--gris);margin-top:2px}
+  .switch{position:relative;flex-shrink:0;width:52px;height:30px}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{
+    position:absolute;inset:0;cursor:pointer;background:#cfcfcf;border-radius:30px;transition:.2s;
+  }
+  .slider:before{
+    content:"";position:absolute;height:24px;width:24px;left:3px;top:3px;
+    background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3);
+  }
+  .switch input:checked + .slider{background:var(--ambre)}
+  .switch input:checked + .slider:before{transform:translateX(22px)}
+  .switch input:focus + .slider{outline:2px solid var(--rouge);outline-offset:2px}
+
+  .toggle.off{opacity:.4;pointer-events:none}
+
+  label{display:block;font-size:13.5px;font-weight:600;margin-bottom:7px}
+  .input-row{display:flex;align-items:center;gap:10px}
+  input[type=number]{
+    font-size:26px;font-weight:700;width:120px;padding:10px 12px;
+    border:2px solid var(--ligne);border-radius:10px;text-align:center;
+  }
+  input[type=number]:focus{outline:none;border-color:var(--rouge)}
+  .unit{font-size:15px;color:var(--gris);font-weight:600}
+
+  .toggle{margin-top:18px}
+  .toggle .opts{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap}
+  .opt{
+    flex:1;min-width:140px;cursor:pointer;border:2px solid var(--ligne);
+    border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;text-align:center;
+    color:var(--gris);transition:.15s;
+  }
+  .opt.active{border-color:var(--rouge);background:#fef2f3;color:var(--rouge)}
+  .opt small{display:block;font-weight:500;font-size:11.5px;color:var(--gris);margin-top:2px}
+
+  .result{margin-top:8px}
+  .breakdown{font-size:14px;border-top:1px solid var(--ligne);margin-top:18px;padding-top:16px}
+  .line{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0}
+  .line .k{color:var(--gris)}
+  .line .v{font-weight:700;font-variant-numeric:tabular-nums}
+  .line.supp .v{color:var(--ambre)}
+  .line.supp .k{color:var(--ambre);font-weight:600}
+
+  .total{
+    margin-top:14px;background:var(--rouge);color:#fff;border-radius:12px;
+    padding:16px 18px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .total .lbl{font-size:13px;text-transform:uppercase;letter-spacing:.5px;opacity:.92}
+  .total .big{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+  .jours{margin-top:14px}
+  .jours-input{margin-bottom:12px}
+  .total-mois{background:var(--encre)}
+  .total-mois .big{font-size:26px}
+  .mensuel{font-size:12.5px;color:var(--gris);margin-top:12px;text-align:center}
+  .mensuel b{color:var(--encre)}
+  .alerte{font-size:12.5px;color:var(--rouge-fonce);background:#fdeef0;border-radius:8px;padding:10px 12px;margin-top:12px;display:none}
+
+  /* Tableau */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+  thead th{
+    background:var(--rouge);color:#fff;font-weight:600;padding:9px 6px;text-align:center;
+    font-size:11px;line-height:1.25;border:1px solid var(--rouge-fonce);
+  }
+  tbody td{padding:7px 6px;text-align:center;border:1px solid var(--ligne)}
+  tbody tr:nth-child(even){background:#faf9f8}
+  .col-supp{color:var(--ambre);font-weight:600;background:var(--ambre-fond)!important}
+  .col-total{font-weight:700}
+  .table-note{font-size:12px;color:var(--gris);margin-top:12px}
+
+  .ctrls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .ctrl{flex:1;min-width:150px}
+  .ctrl-sm{min-width:110px;flex:0 0 auto}
+  .ctrl label{font-size:12.5px;font-weight:600;margin-bottom:6px}
+  select,.ctrl input[type=number]{
+    width:100%;font-size:15px;font-weight:600;padding:10px 12px;
+    border:2px solid var(--ligne);border-radius:10px;background:#fff;color:var(--encre);
+  }
+  select:focus,.ctrl input:focus{outline:none;border-color:var(--rouge)}
+  .ctrl-sm input{text-align:center}
+  .chk{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px}
+  .chk input{width:18px;height:18px;accent-color:var(--rouge)}
+  .taux-info{
+    font-size:13px;background:#eef4fb;border:1px solid #cdddf0;color:#22507e;
+    border-radius:10px;padding:11px 13px;margin-bottom:16px;line-height:1.45;
+  }
+  .taux-info b{font-weight:800}
+  .col-fo{font-weight:700}
+  .col-urssaf{font-weight:700;background:#eef4fb!important;color:#22507e}
+  .col-ecart{font-weight:800}
+  .ecart-neg{color:var(--rouge)}
+  .ecart-pos{color:#1a7d3c}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  footer{font-size:11.5px;color:var(--gris);text-align:center;margin-top:26px;line-height:1.6}
+  footer b{color:var(--encre)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="logo">FO</div>
+    <div>
+      <h1>Indemnité d'éloignement</h1>
+      <p>FO Métaux ArcelorMittal Fos-sur-Mer — barème + mesure exceptionnelle</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <span class="badge">+ 0,02 € / km — mesure exceptionnelle</span>
+  <p class="intro">Saisis ta distance domicile→travail. Le simulateur applique le barème journalier et ajoute la mesure exceptionnelle de 2 centimes du kilomètre.</p>
+
+  <!-- SIMULATEUR -->
+  <div class="card">
+    <h2>Mon indemnité journalière</h2>
+
+    <div class="switch-row">
+      <div class="txt">Mesure exceptionnelle (+2 centimes/km)
+        <small>Coche pour l'appliquer, décoche pour comparer</small></div>
+      <label class="switch">
+        <input type="checkbox" id="mesure" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <label for="km">Distance domicile → travail</label>
+    <div class="input-row">
+      <input type="number" id="km" min="2" max="60" step="1" value="20">
+      <span class="unit">km (trajet simple)</span>
+    </div>
+
+    <div class="toggle">
+      <label>Application des 2 centimes</label>
+      <div class="opts">
+        <div class="opt active" data-basis="ar">Par km aller-retour
+          <small>2 centimes × distance réelle parcourue</small></div>
+        <div class="opt" data-basis="simple">Par km domicile→travail
+          <small>2 centimes × trajet simple</small></div>
+      </div>
+    </div>
+
+    <div class="result">
+      <div class="breakdown">
+        <div class="line"><span class="k">Trajet aller-retour</span><span class="v" id="rAR">40 km</span></div>
+        <div class="line"><span class="k">Barème journalier de base</span><span class="v" id="rBase">7,65 €</span></div>
+        <div class="line supp"><span class="k">Mesure exceptionnelle (2 centimes/km)</span><span class="v" id="rSupp">+0,80 €</span></div>
+      </div>
+      <div class="total">
+        <span class="lbl">Indemnité journalière</span>
+        <span class="big" id="rTotal">8,45 €</span>
+      </div>
+
+      <div class="jours">
+        <div class="jours-input">
+          <label for="jours">Jours travaillés</label>
+          <div class="input-row">
+            <input type="number" id="jours" min="0" max="31" step="1" value="21">
+            <span class="unit">jours</span>
+          </div>
+        </div>
+        <div class="total total-mois">
+          <span class="lbl">Indemnité sur la période</span>
+          <span class="big" id="rMois">177,45 €</span>
+        </div>
+      </div>
+      <div class="alerte" id="alerte"></div>
+    </div>
+  </div>
+
+  <!-- TABLEAU UNIQUE -->
+  <div class="card">
+    <h2>Indemnité d'éloignement comparée au barème URSSAF</h2>
+
+    <div class="ctrls">
+      <div class="ctrl">
+        <label for="cv">Puissance fiscale</label>
+        <select id="cv">
+          <option value="3">3 CV et moins</option>
+          <option value="4">4 CV</option>
+          <option value="5" selected>5 CV</option>
+          <option value="6">6 CV</option>
+          <option value="7">7 CV et plus</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <label for="tranche">Tranche annuelle km</label>
+        <select id="tranche">
+          <option value="a" selected>Jusqu'à 5 000 km</option>
+          <option value="b">5 001 à 20 000 km</option>
+          <option value="c">Au-delà de 20 000 km</option>
+        </select>
+      </div>
+      <div class="ctrl ctrl-sm">
+        <label for="joursComp">Jours travaillés</label>
+        <input type="number" id="joursComp" min="0" max="31" step="1" value="18">
+      </div>
+    </div>
+    <label class="chk"><input type="checkbox" id="elec"> Véhicule électrique (majoration +20 %)</label>
+
+    <div class="taux-info" id="tauxInfo"></div>
+
+    <div class="scroll">
+      <table id="comp">
+        <thead>
+          <tr>
+            <th>Distance<br>domicile-travail<br>(km)</th>
+            <th>Aller-retour<br>(km)</th>
+            <th>Indemnité<br>par jour<br>(€)</th>
+            <th id="thIndPer">Indemnité<br>18 jours<br>(€)</th>
+            <th id="thUrsPer">Barème URSSAF<br>18 jours<br>(€)</th>
+            <th id="thEcartPer">Écart<br>18 jours<br>(€)</th>
+          </tr>
+        </thead>
+        <tbody id="compBody"></tbody>
+      </table>
+    </div>
+    <p class="table-note" id="compNote"></p>
+  </div>
+
+  <footer>
+    <b>FO Métaux ArcelorMittal</b> — Outil d'aide à la lecture du barème.<br>
+    Le barème de base s'arrête à 60 km domicile→travail (grille officielle).<br>
+    En cas de doute sur les valeurs, se référer à l'accord en vigueur.
+  </footer>
+</div>
+
+<script>
+// Barème officiel : distance domicile->travail (km) -> barème journalier de base (€)
+const BAREME = {
+  2:1.29,3:1.71,4:2.15,5:2.67,6:2.95,7:3.35,8:3.72,9:4.07,10:4.44,
+  11:4.77,12:5.12,13:5.45,14:5.80,15:6.11,16:6.45,17:6.73,18:7.05,19:7.36,20:7.65,
+  21:7.99,22:8.25,23:8.56,24:8.86,25:9.16,26:9.43,27:9.71,28:10.00,29:10.29,30:10.55,
+  31:10.84,32:11.11,33:11.39,34:11.64,35:11.94,36:12.19,37:12.45,38:12.73,39:12.99,40:13.25,
+  41:13.52,42:13.77,43:14.04,44:14.28,45:14.53,46:14.81,47:15.05,48:15.31,49:15.55,50:15.80,
+  51:16.05,52:16.31,53:16.55,54:16.80,55:17.04,56:17.29,57:17.52,58:17.77,59:18.02,60:18.25
+};
+const SUPP = 0.02;        // 2 centimes
+const JOURS = 21;         // jours travaillés / mois (estimation)
+let basis = 'ar';         // 'ar' = par km aller-retour | 'simple' = par km domicile->travail
+let applyMeasure = true;  // mesure exceptionnelle activée
+
+const eur = n => n.toFixed(2).replace('.', ',') + ' €';
+const eurSigne = n => '+' + eur(n);
+
+function suppFor(kmSimple){
+  if(!applyMeasure) return 0;
+  const kmBasis = (basis === 'ar') ? kmSimple * 2 : kmSimple;
+  return SUPP * kmBasis;
+}
+
+function calc(){
+  let km = parseInt(document.getElementById('km').value, 10);
+  const alerte = document.getElementById('alerte');
+  alerte.style.display = 'none';
+
+  if(isNaN(km)){ km = 0; }
+
+  let kmBase = km;
+  if(km > 60){ kmBase = 60; alerte.style.display='block';
+    alerte.textContent = "La grille officielle s'arrête à 60 km. Le barème de base est plafonné à la valeur 60 km — à confirmer avec l'accord."; }
+  if(km > 0 && km < 2){ alerte.style.display='block';
+    alerte.textContent = "Le barème démarre à 2 km domicile→travail."; }
+
+  const base = BAREME[kmBase] || 0;
+  const supp = suppFor(km);
+  const total = base + supp;
+
+  document.getElementById('rAR').textContent   = (km*2) + ' km';
+  document.getElementById('rBase').textContent = eur(base);
+  document.getElementById('rSupp').textContent = eurSigne(supp);
+  document.getElementById('rTotal').textContent= eur(total);
+  let jours = parseInt(document.getElementById('jours').value, 10);
+  if(isNaN(jours) || jours < 0){ jours = 0; }
+  document.getElementById('rMois').textContent = eur(total * jours);
+}
+
+// ---- Comparatif barème kilométrique fiscal / URSSAF 2026 (= valeurs 2025) ----
+const URSSAF = {
+  '3': {a:0.529, b:0.316, c:0.370},
+  '4': {a:0.606, b:0.340, c:0.407},
+  '5': {a:0.636, b:0.357, c:0.427},
+  '6': {a:0.665, b:0.374, c:0.447},
+  '7': {a:0.697, b:0.394, c:0.470}
+};
+const TRANCHE_LBL = {a:'jusqu\u2019\u00e0 5 000 km', b:'5 001 \u00e0 20 000 km', c:'au-del\u00e0 de 20 000 km'};
+const CV_LBL = {'3':'3 CV et moins','4':'4 CV','5':'5 CV','6':'6 CV','7':'7 CV et plus'};
+
+function ursaffRate(){
+  const cv = document.getElementById('cv').value;
+  const tr = document.getElementById('tranche').value;
+  let r = URSSAF[cv][tr];
+  if(document.getElementById('elec').checked) r *= 1.20;
+  return r;
+}
+function ecartCell(diff){
+  const cls = diff > 0 ? 'ecart-neg' : 'ecart-pos';
+  const signe = diff > 0 ? '\u2212' : '+';
+  return `<span class="${cls}">${signe}${eur(Math.abs(diff))}</span>`;
+}
+function buildComparison(){
+  const rate = ursaffRate();
+  let jours = parseInt(document.getElementById('joursComp').value, 10);
+  if(isNaN(jours) || jours < 0) jours = 0;
+
+  // En-têtes dynamiques selon le nombre de jours
+  document.getElementById('thIndPer').innerHTML  = 'Indemnité<br>' + jours + ' jours<br>(€)';
+  document.getElementById('thUrsPer').innerHTML  = 'Barème URSSAF<br>' + jours + ' jours<br>(€)';
+  document.getElementById('thEcartPer').innerHTML= 'Écart<br>' + jours + ' jours<br>(€)';
+
+  let rows = '';
+  for(let km=2; km<=60; km++){
+    const ar  = km*2;
+    const indJ = BAREME[km] + suppFor(km);   // indemnité par jour (barème + 2 centimes)
+    const indP = indJ * jours;
+    const urP  = ar * rate * jours;
+    rows += `<tr>
+      <td>${km}</td>
+      <td>${ar}</td>
+      <td class="col-fo">${eur(indJ)}</td>
+      <td class="col-fo">${eur(indP)}</td>
+      <td class="col-urssaf">${eur(urP)}</td>
+      <td class="col-ecart">${ecartCell(urP - indP)}</td>
+    </tr>`;
+  }
+  document.getElementById('compBody').innerHTML = rows;
+
+  const cv = document.getElementById('cv').value;
+  const tr = document.getElementById('tranche').value;
+  const elec = document.getElementById('elec').checked;
+  const indLbl = applyMeasure ? 'barème journalier + 2 centimes/km' : 'barème journalier seul (mesure désactivée)';
+  document.getElementById('tauxInfo').innerHTML =
+    'Taux URSSAF retenu : <b>' + eur(rate).replace(' €','') + ' €/km</b> &mdash; ' + CV_LBL[cv] +
+    ', tranche ' + TRANCHE_LBL[tr] + (elec ? ', +20 % électrique' : '') + '.<br>' +
+    'Indemnité = ' + indLbl + '. Barème URSSAF = km aller-retour × taux × ' + jours + ' jours.';
+
+  const note = (tr==='a')
+    ? 'Tranche « jusqu\u2019\u00e0 5 000 km » : taux par km le plus élevé (sans part fixe annuelle).'
+    : 'Au-delà de 5 000 km, le barème officiel ajoute une part fixe annuelle non reprise ici : le taux/km réel est un peu supérieur.';
+  document.getElementById('compNote').innerHTML =
+    'Écart = barème URSSAF − indemnité (en rouge = indemnité inférieure au barème officiel). ' +
+    note + ' Barème kilométrique 2026 (valeurs 2025, non revalorisées).';
+}
+
+function refreshAll(){ calc(); buildComparison(); }
+
+document.getElementById('km').addEventListener('input', calc);
+document.getElementById('jours').addEventListener('input', calc);
+document.getElementById('mesure').addEventListener('change', (e)=>{
+  applyMeasure = e.target.checked;
+  document.querySelector('.toggle').classList.toggle('off', !applyMeasure);
+  refreshAll();
+});
+document.querySelectorAll('.opt').forEach(o=>{
+  o.addEventListener('click', ()=>{
+    document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+    o.classList.add('active');
+    basis = o.dataset.basis;
+    refreshAll();
+  });
+});
+['cv','tranche','elec','joursComp'].forEach(id=>{
+  const el = document.getElementById(id);
+  el.addEventListener('change', buildComparison);
+  el.addEventListener('input', buildComparison);
+});
+
+calc();
+buildComparison();
+</script>
+</body>
+</html>
