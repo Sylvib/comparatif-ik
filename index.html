@@ -75,7 +75,6 @@
   .switch input:checked + .slider:before{transform:translateX(22px)}
   .switch input:focus + .slider{outline:2px solid var(--rouge);outline-offset:2px}
 
-  .toggle.off{opacity:.4;pointer-events:none}
 
   label{display:block;font-size:13.5px;font-weight:600;margin-bottom:7px}
   .input-row{display:flex;align-items:center;gap:10px}
@@ -85,16 +84,6 @@
   }
   input[type=number]:focus{outline:none;border-color:var(--rouge)}
   .unit{font-size:15px;color:var(--gris);font-weight:600}
-
-  .toggle{margin-top:18px}
-  .toggle .opts{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap}
-  .opt{
-    flex:1;min-width:140px;cursor:pointer;border:2px solid var(--ligne);
-    border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;text-align:center;
-    color:var(--gris);transition:.15s;
-  }
-  .opt.active{border-color:var(--rouge);background:#fef2f3;color:var(--rouge)}
-  .opt small{display:block;font-weight:500;font-size:11.5px;color:var(--gris);margin-top:2px}
 
   .result{margin-top:8px}
   .breakdown{font-size:14px;border-top:1px solid var(--ligne);margin-top:18px;padding-top:16px}
@@ -191,16 +180,6 @@
     <div class="input-row">
       <input type="number" id="km" min="2" max="60" step="1" value="20">
       <span class="unit">km (trajet simple)</span>
-    </div>
-
-    <div class="toggle">
-      <label>Application des 2 centimes</label>
-      <div class="opts">
-        <div class="opt active" data-basis="ar">Par km aller-retour
-          <small>2 centimes × distance réelle parcourue</small></div>
-        <div class="opt" data-basis="simple">Par km domicile→travail
-          <small>2 centimes × trajet simple</small></div>
-      </div>
     </div>
 
     <div class="result">
@@ -300,7 +279,6 @@ const BAREME = {
 };
 const SUPP = 0.02;        // 2 centimes
 const JOURS = 21;         // jours travaillés / mois (estimation)
-let basis = 'ar';         // 'ar' = par km aller-retour | 'simple' = par km domicile->travail
 let applyMeasure = true;  // mesure exceptionnelle activée
 
 const eur = n => n.toFixed(2).replace('.', ',') + ' €';
@@ -308,8 +286,7 @@ const eurSigne = n => '+' + eur(n);
 
 function suppFor(kmSimple){
   if(!applyMeasure) return 0;
-  const kmBasis = (basis === 'ar') ? kmSimple * 2 : kmSimple;
-  return SUPP * kmBasis;
+  return SUPP * (kmSimple * 2);   // 2 centimes × km aller-retour
 }
 
 function calc(){
@@ -411,16 +388,7 @@ document.getElementById('km').addEventListener('input', calc);
 document.getElementById('jours').addEventListener('input', calc);
 document.getElementById('mesure').addEventListener('change', (e)=>{
   applyMeasure = e.target.checked;
-  document.querySelector('.toggle').classList.toggle('off', !applyMeasure);
   refreshAll();
-});
-document.querySelectorAll('.opt').forEach(o=>{
-  o.addEventListener('click', ()=>{
-    document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
-    o.classList.add('active');
-    basis = o.dataset.basis;
-    refreshAll();
-  });
 });
 ['cv','tranche','elec','joursComp'].forEach(id=>{
   const el = document.getElementById(id);
